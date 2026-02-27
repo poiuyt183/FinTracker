@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/app_pallete_dark.dart';
 import 'package:frontend/core/theme/app_pallete_light.dart';
 import 'package:frontend/features/auth/view/pages/sign_up_page.dart';
+import 'package:frontend/features/auth/viewmodel/auth_provider.dart';
 import 'package:frontend/features/get_started/views/pages/get_started_page.dart';
+import 'package:frontend/features/home/view/pages/home_page.dart';
+import 'package:provider/provider.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -23,6 +26,115 @@ class _SignInPageState extends State<SignInPage> {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  void _showForgotPasswordDialog(BuildContext context, bool isDark) {
+    final resetEmailController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: isDark ? Colors.white : PalleteDark.backgroundColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          'Reset Password',
+          style: TextStyle(
+            color: isDark ? Colors.black87 : PalleteDark.whiteColor,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        content: Form(
+          key: formKey,
+          child: TextFormField(
+            controller: resetEmailController,
+            keyboardType: TextInputType.emailAddress,
+            decoration: InputDecoration(
+              labelText: 'Email',
+              hintText: 'Enter your email',
+              prefixIcon: Icon(
+                Icons.email_outlined,
+                color: isDark
+                    ? PalleteLight.subtitleText
+                    : PalleteDark.subtitleText,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter your email';
+              }
+              if (!value.contains('@')) {
+                return 'Please enter a valid email';
+              }
+              return null;
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                color: isDark
+                    ? PalleteLight.subtitleText
+                    : PalleteDark.subtitleText,
+              ),
+            ),
+          ),
+          Consumer<AuthProvider>(
+            builder: (context, authProvider, child) {
+              return TextButton(
+                onPressed: authProvider.isLoading
+                    ? null
+                    : () async {
+                        if (formKey.currentState!.validate()) {
+                          final success = await authProvider.resetPassword(
+                            email: resetEmailController.text.trim(),
+                          );
+
+                          if (context.mounted) {
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  success
+                                      ? 'Password reset email sent. Check your inbox.'
+                                      : authProvider.errorMessage ??
+                                            'Failed to send reset email',
+                                ),
+                                backgroundColor: success
+                                    ? Colors.green
+                                    : Colors.red,
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                            authProvider.clearError();
+                          }
+                        }
+                      },
+                child: authProvider.isLoading
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Text(
+                        'Send',
+                        style: TextStyle(
+                          color: isDark ? Colors.black : Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -236,7 +348,8 @@ class _SignInPageState extends State<SignInPage> {
                       ),
                       TextButton(
                         onPressed: () {
-                          // Handle forgot password
+                          // Show forgot password dialog
+                          _showForgotPasswordDialog(context, isDark);
                         },
                         style: TextButton.styleFrom(
                           padding: EdgeInsets.zero,
@@ -261,31 +374,78 @@ class _SignInPageState extends State<SignInPage> {
                   SizedBox(
                     width: double.infinity,
                     height: 56,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          // Handle sign in
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Signing in...')),
-                          );
-                        }
+                    child: Consumer<AuthProvider>(
+                      builder: (context, authProvider, child) {
+                        return ElevatedButton(
+                          onPressed: authProvider.isLoading
+                              ? null
+                              : () async {
+                                  if (_formKey.currentState!.validate()) {
+                                    final success = await authProvider.signIn(
+                                      email: _emailController.text.trim(),
+                                      password: _passwordController.text,
+                                    );
+
+                                    if (success && context.mounted) {
+                                      // Navigate to HomePage
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              const HomePage(),
+                                        ),
+                                      );
+                                    } else if (context.mounted &&
+                                        authProvider.errorMessage != null) {
+                                      // Show error message
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            authProvider.errorMessage ?? '',
+                                          ),
+                                          backgroundColor: Colors.red,
+                                          behavior: SnackBarBehavior.floating,
+                                        ),
+                                      );
+                                      authProvider.clearError();
+                                    }
+                                  }
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: isDark
+                                ? Colors.black
+                                : Colors.white,
+                            foregroundColor: isDark
+                                ? Colors.white
+                                : Colors.black,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          child: authProvider.isLoading
+                              ? SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      isDark ? Colors.white : Colors.black,
+                                    ),
+                                  ),
+                                )
+                              : const Text(
+                                  'Sign In',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                        );
                       },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: isDark ? Colors.black : Colors.white,
-                        foregroundColor: isDark ? Colors.white : Colors.black,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                      child: const Text(
-                        'Sign In',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
                     ),
                   ),
 

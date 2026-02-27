@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/app_pallete_dark.dart';
 import 'package:frontend/core/theme/app_pallete_light.dart';
+import 'package:frontend/features/auth/viewmodel/auth_provider.dart';
+import 'package:frontend/features/get_started/views/pages/get_started_page.dart';
+import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -41,6 +44,152 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  void _showSettingsMenu(BuildContext context, bool isDark) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: isDark ? Colors.white : PalleteDark.backgroundColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 20),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            ListTile(
+              leading: Icon(
+                Icons.person_outline,
+                color: isDark ? Colors.black87 : PalleteDark.whiteColor,
+              ),
+              title: Text(
+                'Profile',
+                style: TextStyle(
+                  color: isDark ? Colors.black87 : PalleteDark.whiteColor,
+                ),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                // Navigate to profile page
+              },
+            ),
+            ListTile(
+              leading: Icon(
+                Icons.settings,
+                color: isDark ? Colors.black87 : PalleteDark.whiteColor,
+              ),
+              title: Text(
+                'Settings',
+                style: TextStyle(
+                  color: isDark ? Colors.black87 : PalleteDark.whiteColor,
+                ),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                // Navigate to settings page
+              },
+            ),
+            Divider(
+              color: isDark ? Colors.grey.shade300 : Colors.grey.shade700,
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout, color: Colors.red),
+              title: const Text(
+                'Sign Out',
+                style: TextStyle(color: Colors.red),
+              ),
+              onTap: () async {
+                Navigator.pop(context);
+                _showSignOutDialog(context, isDark);
+              },
+            ),
+            const SizedBox(height: 10),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showSignOutDialog(BuildContext context, bool isDark) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: isDark ? Colors.white : PalleteDark.backgroundColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          'Sign Out',
+          style: TextStyle(
+            color: isDark ? Colors.black87 : PalleteDark.whiteColor,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        content: Text(
+          'Are you sure you want to sign out?',
+          style: TextStyle(
+            color: isDark
+                ? PalleteLight.subtitleText
+                : PalleteDark.subtitleText,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                color: isDark
+                    ? PalleteLight.subtitleText
+                    : PalleteDark.subtitleText,
+              ),
+            ),
+          ),
+          Consumer<AuthProvider>(
+            builder: (context, authProvider, child) {
+              return TextButton(
+                onPressed: authProvider.isLoading
+                    ? null
+                    : () async {
+                        await authProvider.signOut();
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const GetStartedPage(),
+                            ),
+                            (route) => false,
+                          );
+                        }
+                      },
+                child: authProvider.isLoading
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text(
+                        'Sign Out',
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -72,7 +221,9 @@ class _HomePageState extends State<HomePage> {
               Icons.settings_outlined,
               color: isDark ? Colors.black87 : PalleteDark.whiteColor,
             ),
-            onPressed: () {},
+            onPressed: () {
+              _showSettingsMenu(context, isDark);
+            },
           ),
         ],
       ),
