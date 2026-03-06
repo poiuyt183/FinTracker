@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:frontend/core/config/app_vectors.dart';
@@ -46,7 +47,7 @@ class GetStartedPage extends StatelessWidget {
 
               // Title
               Text(
-                'FinTracker',
+                'app_name'.tr(),
                 textAlign: TextAlign.center,
                 style: theme.textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.w600,
@@ -60,7 +61,7 @@ class GetStartedPage extends StatelessWidget {
 
               // Subtitle
               Text(
-                'Take control of your finances.\nTrack, save, and grow your wealth.',
+                'app_tagline'.tr(),
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyLarge?.copyWith(
                   color: isDark
@@ -86,8 +87,8 @@ class GetStartedPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  child: const Text(
-                    'Get Started',
+                  child: Text(
+                    'get_started'.tr(),
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
@@ -111,7 +112,7 @@ class GetStartedPage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Already have an account? ',
+                      'already_have_account'.tr(),
                       style: TextStyle(
                         fontSize: 14,
                         color: isDark
@@ -120,7 +121,7 @@ class GetStartedPage extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'Sign In',
+                      'sign_in'.tr(),
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,

@@ -1,8 +1,16 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:frontend/core/theme/app_pallete_dark.dart';
-import 'package:frontend/core/theme/app_pallete_light.dart';
+import 'package:frontend/core/theme/theme_palette.dart';
 import 'package:frontend/features/auth/viewmodel/auth_provider.dart';
 import 'package:frontend/features/get_started/views/pages/get_started_page.dart';
+import 'package:frontend/features/home/models/wallet_model.dart';
+import 'package:frontend/features/home/models/transaction_model.dart';
+import 'package:frontend/features/home/models/chart_data_model.dart';
+import 'package:frontend/features/home/utils/chart_data_from_transactions.dart';
+import 'package:frontend/features/home/utils/currency_formatter.dart';
+import 'package:frontend/features/home/utils/transaction_parser.dart';
+import 'package:frontend/features/home/view/pages/money_lover_home.dart';
+import 'package:frontend/features/settings/views/pages/settings_page.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
@@ -15,43 +23,193 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
 
-  // Mock data
-  final double totalBalance = 15750000; // 15,750,000 VND
-  final List<Map<String, dynamic>> wallets = [
-    {
-      'name': 'Ví tiền mặt',
-      'icon': Icons.account_balance_wallet,
-      'balance': 5000000,
-      'color': Colors.blue,
-    },
-    {
-      'name': 'Ngân hàng',
-      'icon': Icons.account_balance,
-      'balance': 10000000,
-      'color': Colors.green,
-    },
-    {
-      'name': 'Thẻ tín dụng',
-      'icon': Icons.credit_card,
-      'balance': 750000,
-      'color': Colors.orange,
-    },
+  List<WalletModel> _wallets = [
+    const WalletModel(
+      icon: Icons.credit_card,
+      color: Colors.teal,
+      title: "ACB Credit Platin...",
+      amount: "-15,884,000 ₫",
+    ),
+    const WalletModel(
+      icon: Icons.laptop,
+      color: Colors.orange,
+      title: "Mua MacBook Pro",
+      amount: "11,270,000 ₫",
+    ),
+    const WalletModel(
+      icon: Icons.money,
+      color: Colors.green,
+      title: "Tiền mặt",
+      amount: "10,000,000 ₫",
+    ),
   ];
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+  final List<TransactionModel> _transactions = [
+    TransactionModel(
+      icon: Icons.account_balance_wallet,
+      title: "Tiền chuyển đến",
+      date: "1 tháng 2 2026",
+      amount: "5,000,000",
+      isIncome: true,
+      category: "Chuyển khoản",
+    ),
+    TransactionModel(
+      icon: Icons.restaurant,
+      title: "Ăn uống",
+      date: "1 tháng 2 2026",
+      amount: "350,000",
+      isIncome: false,
+      category: "Ăn uống",
+    ),
+    TransactionModel(
+      icon: Icons.directions_car,
+      title: "Xăng xe",
+      date: "3 tháng 2 2026",
+      amount: "500,000",
+      isIncome: false,
+      category: "Di chuyển",
+    ),
+    TransactionModel(
+      icon: Icons.payments,
+      title: "Thu nợ",
+      date: "5 tháng 2 2026",
+      amount: "2,000,000",
+      isIncome: true,
+      category: "Thu nợ",
+    ),
+    TransactionModel(
+      icon: Icons.shopping_bag,
+      title: "Mua sắm",
+      date: "5 tháng 2 2026",
+      amount: "1,200,000",
+      isIncome: false,
+      category: "Mua sắm",
+    ),
+    TransactionModel(
+      icon: Icons.medical_services,
+      title: "Sức khỏe",
+      date: "8 tháng 2 2026",
+      amount: "30,000",
+      isIncome: false,
+      category: "Sức khỏe",
+    ),
+    TransactionModel(
+      icon: Icons.account_balance_wallet,
+      title: "Lương",
+      date: "10 tháng 2 2026",
+      amount: "15,000,000",
+      isIncome: true,
+      category: "Lương",
+    ),
+    TransactionModel(
+      icon: Icons.restaurant,
+      title: "Ăn uống",
+      date: "10 tháng 2 2026",
+      amount: "280,000",
+      isIncome: false,
+      category: "Ăn uống",
+    ),
+    TransactionModel(
+      icon: Icons.movie,
+      title: "Giải trí",
+      date: "12 tháng 2 2026",
+      amount: "200,000",
+      isIncome: false,
+      category: "Giải trí",
+    ),
+    TransactionModel(
+      icon: Icons.local_gas_station,
+      title: "Xăng",
+      date: "15 tháng 2 2026",
+      amount: "450,000",
+      isIncome: false,
+      category: "Di chuyển",
+    ),
+    TransactionModel(
+      icon: Icons.card_giftcard,
+      title: "Quà sinh nhật",
+      date: "18 tháng 2 2026",
+      amount: "800,000",
+      isIncome: false,
+      category: "Quà tặng",
+    ),
+    TransactionModel(
+      icon: Icons.payments,
+      title: "Thu nợ",
+      date: "20 tháng 2 2026",
+      amount: "3,000,000",
+      isIncome: true,
+      category: "Thu nợ",
+    ),
+    TransactionModel(
+      icon: Icons.restaurant,
+      title: "Ăn uống",
+      date: "22 tháng 2 2026",
+      amount: "420,000",
+      isIncome: false,
+      category: "Ăn uống",
+    ),
+    TransactionModel(
+      icon: Icons.shopping_cart,
+      title: "Siêu thị",
+      date: "25 tháng 2 2026",
+      amount: "650,000",
+      isIncome: false,
+      category: "Siêu thị",
+    ),
+    TransactionModel(
+      icon: Icons.phone_android,
+      title: "Tiền điện thoại",
+      date: "28 tháng 2 2026",
+      amount: "100,000",
+      isIncome: false,
+      category: "Công nghệ",
+    ),
+  ];
+
+  ChartDataModel get _chartData => chartDataFromTransactions(
+        _transactions,
+        month: 2,
+        year: 2026,
+        daysInMonth: 28,
+      );
+
+  String get _totalBalance {
+    double sum = 0;
+    for (final w in _wallets) {
+      final value = parseAmountFromString(w.amount);
+      sum += w.amount.trim().startsWith('-') ? -value : value;
+    }
+    return formatCurrency(sum, currency: '₫', decimalDigits: 0);
   }
 
-  void _showSettingsMenu(BuildContext context, bool isDark) {
+  List<Widget> _buildPages(BuildContext context) {
+    return [
+      MoneyLoverHome(
+        wallets: _wallets,
+        transactions: _transactions,
+        chartData: _chartData,
+        totalBalance: _totalBalance,
+        onWalletsUpdated: (list) => setState(() => _wallets = list),
+        onViewAllTransactions: () => setState(() => _selectedIndex = 1),
+        onSettingsTap: () => _showSettingsMenu(context),
+      ),
+      Center(child: Text('transactions'.tr())),
+      Center(child: Text('add'.tr())),
+      Center(child: Text('budget'.tr())),
+      Center(child: Text('account'.tr())),
+    ];
+  }
+
+  void _showSettingsMenu(BuildContext context) {
+    final p = paletteOf(context);
     showModalBottomSheet(
       context: context,
-      backgroundColor: isDark ? Colors.white : PalleteDark.backgroundColor,
+      backgroundColor: p.dialogBg,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => Padding(
+      builder: (ctx) => Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -61,54 +219,33 @@ class _HomePageState extends State<HomePage> {
               height: 4,
               margin: const EdgeInsets.only(bottom: 20),
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: p.borderColor,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
             ListTile(
-              leading: Icon(
-                Icons.person_outline,
-                color: isDark ? Colors.black87 : PalleteDark.whiteColor,
-              ),
-              title: Text(
-                'Profile',
-                style: TextStyle(
-                  color: isDark ? Colors.black87 : PalleteDark.whiteColor,
-                ),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                // Navigate to profile page
-              },
+              leading: Icon(Icons.person_outline, color: p.primaryText),
+              title: Text('profile'.tr(), style: TextStyle(color: p.primaryText)),
+              onTap: () => Navigator.pop(context),
             ),
             ListTile(
-              leading: Icon(
-                Icons.settings,
-                color: isDark ? Colors.black87 : PalleteDark.whiteColor,
-              ),
-              title: Text(
-                'Settings',
-                style: TextStyle(
-                  color: isDark ? Colors.black87 : PalleteDark.whiteColor,
-                ),
-              ),
+              leading: Icon(Icons.settings, color: p.primaryText),
+              title: Text('settings'.tr(), style: TextStyle(color: p.primaryText)),
               onTap: () {
                 Navigator.pop(context);
-                // Navigate to settings page
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SettingsPage()),
+                );
               },
             ),
-            Divider(
-              color: isDark ? Colors.grey.shade300 : Colors.grey.shade700,
-            ),
+            Divider(color: p.borderColor),
             ListTile(
-              leading: const Icon(Icons.logout, color: Colors.red),
-              title: const Text(
-                'Sign Out',
-                style: TextStyle(color: Colors.red),
-              ),
+              leading: Icon(Icons.logout, color: p.expenseColor),
+              title: Text('sign_out'.tr(), style: TextStyle(color: p.expenseColor)),
               onTap: () async {
                 Navigator.pop(context);
-                _showSignOutDialog(context, isDark);
+                _showSignOutDialog(context);
               },
             ),
             const SizedBox(height: 10),
@@ -118,38 +255,25 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _showSignOutDialog(BuildContext context, bool isDark) {
+  void _showSignOutDialog(BuildContext context) {
+    final p = paletteOf(context);
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: isDark ? Colors.white : PalleteDark.backgroundColor,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: p.dialogBg,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
-          'Sign Out',
-          style: TextStyle(
-            color: isDark ? Colors.black87 : PalleteDark.whiteColor,
-            fontWeight: FontWeight.w600,
-          ),
+          'sign_out'.tr(),
+          style: TextStyle(color: p.primaryText, fontWeight: FontWeight.w600),
         ),
         content: Text(
-          'Are you sure you want to sign out?',
-          style: TextStyle(
-            color: isDark
-                ? PalleteLight.subtitleText
-                : PalleteDark.subtitleText,
-          ),
+          'sign_out_confirm'.tr(),
+          style: TextStyle(color: p.subtitleText),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Cancel',
-              style: TextStyle(
-                color: isDark
-                    ? PalleteLight.subtitleText
-                    : PalleteDark.subtitleText,
-              ),
-            ),
+            child: Text('cancel'.tr(), style: TextStyle(color: p.subtitleText)),
           ),
           Consumer<AuthProvider>(
             builder: (context, authProvider, child) {
@@ -175,10 +299,10 @@ class _HomePageState extends State<HomePage> {
                         height: 16,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text(
-                        'Sign Out',
+                    : Text(
+                        'sign_out'.tr(),
                         style: TextStyle(
-                          color: Colors.red,
+                          color: p.expenseColor,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -192,310 +316,38 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness != Brightness.dark;
+    final p = paletteOf(context);
+    final pages = _buildPages(context);
 
     return Scaffold(
-      backgroundColor: isDark ? Colors.white : PalleteDark.backgroundColor,
-      appBar: AppBar(
-        backgroundColor: isDark ? Colors.white : PalleteDark.backgroundColor,
-        elevation: 0,
-        title: Text(
-          'Tài chính của tôi',
-          style: TextStyle(
-            color: isDark ? Colors.black87 : PalleteDark.whiteColor,
-            fontWeight: FontWeight.w600,
-            fontSize: 18,
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(
-              Icons.notifications_outlined,
-              color: isDark ? Colors.black87 : PalleteDark.whiteColor,
-            ),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: Icon(
-              Icons.settings_outlined,
-              color: isDark ? Colors.black87 : PalleteDark.whiteColor,
-            ),
-            onPressed: () {
-              _showSettingsMenu(context, isDark);
-            },
-          ),
+      backgroundColor: p.backgroundColor,
+      body: Column(
+        children: [
+          Expanded(child: pages[_selectedIndex]),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 24),
-
-              // Tổng số dư Section
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(28),
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.black : Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
-                      blurRadius: 20,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Tổng số dư',
-                      style: TextStyle(
-                        color: isDark ? Colors.white70 : Colors.black54,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      '${totalBalance.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')} đ',
-                      style: TextStyle(
-                        color: isDark ? Colors.white : Colors.black87,
-                        fontSize: 32,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _buildQuickAction(
-                          icon: Icons.add_circle_outline,
-                          label: 'Thu nhập',
-                          onTap: () {},
-                          isDark: isDark,
-                        ),
-                        _buildQuickAction(
-                          icon: Icons.remove_circle_outline,
-                          label: 'Chi tiêu',
-                          onTap: () {},
-                          isDark: isDark,
-                        ),
-                        _buildQuickAction(
-                          icon: Icons.swap_horiz,
-                          label: 'Chuyển',
-                          onTap: () {},
-                          isDark: isDark,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: p.appBarBg,
+        selectedItemColor: p.primaryAction,
+        unselectedItemColor: p.subtitleText,
+        currentIndex: _selectedIndex,
+        onTap: (index) => setState(() => _selectedIndex = index),
+        items: [
+          BottomNavigationBarItem(icon: const Icon(Icons.home), label: 'overview'.tr()),
+          BottomNavigationBarItem(icon: const Icon(Icons.account_balance_wallet), label: 'transactions'.tr()),
+          BottomNavigationBarItem(
+            icon: Padding(
+              padding: const EdgeInsets.all(8),
+              child: CircleAvatar(
+                backgroundColor: p.primaryAction,
+                child: const Icon(Icons.add, color: Colors.white, size: 24),
               ),
-
-              const SizedBox(height: 40),
-
-              // Ví của tôi Section
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Ví của tôi',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: isDark ? Colors.black87 : PalleteDark.whiteColor,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {},
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      minimumSize: const Size(0, 0),
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    child: Text(
-                      'Xem tất cả',
-                      style: TextStyle(
-                        color: isDark ? Colors.black87 : Colors.white,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 20),
-
-              // Wallet List
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: wallets.length,
-                itemBuilder: (context, index) {
-                  final wallet = wallets[index];
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                      color: isDark ? Colors.grey[50] : PalleteDark.cardColor,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: isDark ? Colors.grey[200]! : Colors.grey[800]!,
-                        width: 1,
-                      ),
-                    ),
-                    child: ListTile(
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 12,
-                      ),
-                      leading: Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: wallet['color'].withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(
-                          wallet['icon'],
-                          color: wallet['color'],
-                          size: 24,
-                        ),
-                      ),
-                      title: Text(
-                        wallet['name'],
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: isDark
-                              ? Colors.black87
-                              : PalleteDark.whiteColor,
-                        ),
-                      ),
-                      subtitle: Padding(
-                        padding: const EdgeInsets.only(top: 4),
-                        child: Text(
-                          '${wallet['balance'].toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')} đ',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: isDark
-                                ? PalleteLight.subtitleText
-                                : PalleteDark.subtitleText,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                      trailing: Icon(
-                        Icons.arrow_forward_ios,
-                        size: 16,
-                        color: isDark
-                            ? PalleteLight.subtitleText
-                            : PalleteDark.subtitleText,
-                      ),
-                      onTap: () {},
-                    ),
-                  );
-                },
-              ),
-
-              const SizedBox(height: 32),
-            ],
+            ),
+            label: '',
           ),
-        ),
-      ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          border: Border(
-            top: BorderSide(
-              color: isDark ? Colors.grey[200]! : Colors.grey[800]!,
-              width: 1,
-            ),
-          ),
-        ),
-        child: BottomNavigationBar(
-          currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: isDark ? Colors.white : PalleteDark.backgroundColor,
-          selectedItemColor: isDark ? Colors.black : Colors.white,
-          unselectedItemColor: isDark
-              ? PalleteLight.subtitleText
-              : PalleteDark.subtitleText,
-          selectedFontSize: 12,
-          unselectedFontSize: 12,
-          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600),
-          elevation: 0,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              activeIcon: Icon(Icons.home),
-              label: 'Trang chủ',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.account_balance_wallet_outlined),
-              activeIcon: Icon(Icons.account_balance_wallet),
-              label: 'Giao dịch',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.add_circle_outline),
-              activeIcon: Icon(Icons.add_circle),
-              label: 'Thêm',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.bar_chart_outlined),
-              activeIcon: Icon(Icons.bar_chart),
-              label: 'Báo cáo',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              activeIcon: Icon(Icons.person),
-              label: 'Tài khoản',
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildQuickAction({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-    required bool isDark,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: isDark ? Colors.grey[200] : Colors.white.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              icon,
-              color: isDark ? Colors.black87 : Colors.white,
-              size: 20,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: TextStyle(
-              color: isDark ? Colors.black87 : Colors.white,
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
+          BottomNavigationBarItem(icon: const Icon(Icons.pie_chart), label: 'budget'.tr()),
+          BottomNavigationBarItem(icon: const Icon(Icons.person), label: 'account'.tr()),
         ],
       ),
     );
