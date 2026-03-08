@@ -4,6 +4,8 @@ import 'package:frontend/core/theme/theme_palette.dart';
 import 'package:frontend/features/home/models/transaction_model.dart';
 import 'package:frontend/features/home/models/category_spending_model.dart';
 import 'package:frontend/features/home/utils/category_spending_from_transactions.dart';
+import 'package:frontend/features/home/utils/monthly_report_helper.dart';
+import 'package:frontend/features/home/utils/transaction_parser.dart';
 import 'package:frontend/features/home/view/pages/top_spending_detail_screen.dart';
 import 'package:frontend/features/home/view/widgets/section_header.dart';
 
@@ -26,16 +28,21 @@ class _TopSpendingState extends State<TopSpending> {
   bool _isWeekSelected = true;
   int? _hoveredTabIndex;
 
-  CategorySpendingResult get _result {
+  /// Giao dịch đã lọc theo tab: Tuần = 7 ngày gần nhất, Tháng = tháng hiện tại.
+  List<TransactionModel> get _filteredTransactions {
     final now = DateTime.now();
     if (widget.filterByCurrentMonth && !_isWeekSelected) {
-      return buildCategorySpendingFromTransactions(
-        widget.transactions,
-        periodMonth: now.month,
-        periodYear: now.year,
-      );
+      return widget.transactions.where((t) {
+        final m = monthFromTransaction(t);
+        final y = yearFromTransaction(t);
+        return m == now.month && y == now.year;
+      }).toList();
     }
-    return buildCategorySpendingFromTransactions(widget.transactions);
+    return transactionsInLastDays(widget.transactions, 7);
+  }
+
+  CategorySpendingResult get _result {
+    return buildCategorySpendingFromTransactions(_filteredTransactions);
   }
 
   @override

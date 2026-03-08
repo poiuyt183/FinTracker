@@ -45,6 +45,21 @@ List<TransactionModel> transactionsInMonth(
   }).toList();
 }
 
+/// Lọc giao dịch trong [days] ngày gần nhất (kể từ đầu ngày hôm nay).
+List<TransactionModel> transactionsInLastDays(
+  List<TransactionModel> all,
+  int days,
+) {
+  final now = DateTime.now();
+  final start = DateTime(now.year, now.month, now.day).subtract(Duration(days: days - 1));
+  final endOfToday = DateTime(now.year, now.month, now.day, 23, 59, 59, 999);
+  return all.where((t) {
+    final dt = dateFromTransaction(t);
+    if (dt == null) return false;
+    return !dt.isBefore(start) && !dt.isAfter(endOfToday);
+  }).toList();
+}
+
 /// Tạo dữ liệu báo cáo 12 tháng từ [transactions].
 List<MonthReportData> buildMonthlyReport(List<TransactionModel> transactions) {
   final months = last12MonthsFromNow();
