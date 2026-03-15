@@ -13,7 +13,7 @@ import 'package:frontend/features/home/utils/transaction_parser.dart';
 import 'package:frontend/features/home/view/pages/wallet_management_screen.dart';
 import 'package:frontend/features/home/view/pages/report_detail_screen.dart';
 
-class MoneyLoverHome extends StatelessWidget {
+class FinTrackerHome extends StatelessWidget {
   final List<WalletModel> wallets;
   final List<TransactionModel> transactions;
   final ChartDataModel chartData;
@@ -22,7 +22,7 @@ class MoneyLoverHome extends StatelessWidget {
   final VoidCallback? onViewAllTransactions;
   final VoidCallback? onSettingsTap;
 
-  const MoneyLoverHome({
+  const FinTrackerHome({
     super.key,
     required this.wallets,
     required this.transactions,

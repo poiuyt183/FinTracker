@@ -5,19 +5,15 @@ import 'package:frontend/features/home/models/transaction_model.dart';
 import 'package:frontend/features/home/models/category_spending_model.dart';
 import 'package:frontend/features/home/utils/category_spending_from_transactions.dart';
 import 'package:frontend/features/home/utils/monthly_report_helper.dart';
-import 'package:frontend/features/home/utils/transaction_parser.dart';
 import 'package:frontend/features/home/view/pages/top_spending_detail_screen.dart';
 import 'package:frontend/features/home/view/widgets/section_header.dart';
 
 class TopSpending extends StatefulWidget {
   final List<TransactionModel> transactions;
-  /// Lọc theo tháng (null = tất cả). Tab "Tháng" dùng tháng hiện tại.
-  final bool filterByCurrentMonth;
 
   const TopSpending({
     super.key,
     required this.transactions,
-    this.filterByCurrentMonth = true,
   });
 
   @override
@@ -28,17 +24,11 @@ class _TopSpendingState extends State<TopSpending> {
   bool _isWeekSelected = true;
   int? _hoveredTabIndex;
 
-  /// Giao dịch đã lọc theo tab: Tuần = 7 ngày gần nhất, Tháng = tháng hiện tại.
+  int get _periodDays => _isWeekSelected ? 7 : 30;
+
+  /// Tính từ transaction thật theo khoảng thời gian tương đối.
   List<TransactionModel> get _filteredTransactions {
-    final now = DateTime.now();
-    if (widget.filterByCurrentMonth && !_isWeekSelected) {
-      return widget.transactions.where((t) {
-        final m = monthFromTransaction(t);
-        final y = yearFromTransaction(t);
-        return m == now.month && y == now.year;
-      }).toList();
-    }
-    return transactionsInLastDays(widget.transactions, 7);
+    return transactionsInLastDays(widget.transactions, _periodDays);
   }
 
   CategorySpendingResult get _result {
@@ -100,10 +90,22 @@ class _TopSpendingState extends State<TopSpending> {
                 Row(
                   children: [
                     Expanded(
-                      child: _buildTab(context, 0, "Tuần", _isWeekSelected, () => setState(() => _isWeekSelected = true)),
+                      child: _buildTab(
+                        context,
+                        0,
+                        'one_week'.tr(),
+                        _isWeekSelected,
+                        () => setState(() => _isWeekSelected = true),
+                      ),
                     ),
                     Expanded(
-                      child: _buildTab(context, 1, "Tháng", !_isWeekSelected, () => setState(() => _isWeekSelected = false)),
+                      child: _buildTab(
+                        context,
+                        1,
+                        'one_month'.tr(),
+                        !_isWeekSelected,
+                        () => setState(() => _isWeekSelected = false),
+                      ),
                     ),
                   ],
                 ),
@@ -116,7 +118,7 @@ class _TopSpendingState extends State<TopSpending> {
                         Icon(Icons.analytics_outlined, size: 52, color: p.iconMuted),
                         const SizedBox(height: 16),
                         Text(
-                          "Nhóm chi tiêu nhiều nhất sẽ hiển thị ở đây",
+                          'top_spending_empty'.tr(),
                           style: TextStyle(color: p.subtitleText, fontSize: 15),
                           textAlign: TextAlign.center,
                         ),

@@ -185,7 +185,7 @@ class _HomePageState extends State<HomePage> {
 
   List<Widget> _buildPages(BuildContext context) {
     return [
-      MoneyLoverHome(
+      FinTrackerHome(
         wallets: _wallets,
         transactions: _transactions,
         chartData: _chartData,
