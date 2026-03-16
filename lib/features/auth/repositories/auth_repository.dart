@@ -39,6 +39,8 @@ class AuthRepository {
           'uid': user.uid,
           'email': email,
           'name': name,
+          // currency intentionally left null until user selects it
+          'currency': null,
           'createdAt': FieldValue.serverTimestamp(),
           'updatedAt': FieldValue.serverTimestamp(),
         });

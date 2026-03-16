@@ -5,6 +5,8 @@ import 'package:frontend/features/auth/view/pages/sign_up_page.dart';
 import 'package:frontend/features/auth/viewmodel/auth_provider.dart';
 import 'package:frontend/features/get_started/views/pages/get_started_page.dart';
 import 'package:frontend/features/home/view/pages/home_page.dart';
+import 'package:frontend/features/auth/view/pages/currency_selection_page.dart';
+import 'package:frontend/core/services/settings_service.dart';
 import 'package:provider/provider.dart';
 
 class SignInPage extends StatefulWidget {
@@ -387,14 +389,26 @@ class _SignInPageState extends State<SignInPage> {
                                     );
 
                                     if (success && context.mounted) {
-                                      // Navigate to HomePage
-                                      Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              const HomePage(),
-                                        ),
-                                      );
+                                      final currency =
+                                          await SettingsService.getCurrency();
+                                      if (!mounted) return;
+                                      if (currency == null) {
+                                        Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                const CurrencySelectionPage(),
+                                          ),
+                                        );
+                                      } else {
+                                        Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                const HomePage(),
+                                          ),
+                                        );
+                                      }
                                     } else if (context.mounted &&
                                         authProvider.errorMessage != null) {
                                       // Show error message

@@ -5,6 +5,8 @@ import 'package:frontend/core/theme/theme_provider.dart';
 import 'package:frontend/features/auth/viewmodel/auth_provider.dart';
 import 'package:frontend/features/get_started/views/pages/get_started_page.dart';
 import 'package:frontend/features/home/view/pages/home_page.dart';
+import 'package:frontend/features/auth/view/pages/currency_selection_page.dart';
+import 'package:frontend/core/services/settings_service.dart';
 import 'package:provider/provider.dart';
 
 class SplashPage extends StatefulWidget {
@@ -51,13 +53,26 @@ class _SplashPageState extends State<SplashPage> {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final isAuthenticated = authProvider.isAuthenticated;
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (BuildContext context) {
-          return isAuthenticated ? const HomePage() : const GetStartedPage();
-        },
-      ),
-    );
+    if (isAuthenticated) {
+      final currency = await SettingsService.getCurrency();
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (BuildContext context) {
+            return currency == null
+                ? const CurrencySelectionPage()
+                : const HomePage();
+          },
+        ),
+      );
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (BuildContext context) => const GetStartedPage(),
+        ),
+      );
+    }
   }
 }

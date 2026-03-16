@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class UserModel {
   final String uid;
   final String email;
+  final String? currency;
   final String name;
   final bool isDeleted;
   final DateTime? createdAt;
@@ -11,6 +12,7 @@ class UserModel {
   UserModel({
     required this.uid,
     required this.email,
+    this.currency,
     required this.name,
     this.isDeleted = false,
     this.createdAt,
@@ -21,6 +23,7 @@ class UserModel {
     return UserModel(
       uid: map['uid'] ?? '',
       email: map['email'] ?? '',
+      currency: map['currency'] as String?,
       name: map['name'] ?? '',
       isDeleted: map['isDeleted'] ?? false,
       createdAt: (map['createdAt'] as Timestamp?)?.toDate(),
@@ -32,6 +35,7 @@ class UserModel {
     return {
       'uid': uid,
       'email': email,
+      'currency': currency,
       'name': name,
       'isDeleted': isDeleted,
       'createdAt': createdAt,
