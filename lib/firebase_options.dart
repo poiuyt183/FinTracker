@@ -63,6 +63,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '750631009032',
     projectId: 'fin-tracker-pr',
     storageBucket: 'fin-tracker-pr.firebasestorage.app',
+    iosClientId: '750631009032-ad8t94kttu3n4sapndm102brc112v6e1.apps.googleusercontent.com',
     iosBundleId: 'com.example.frontend',
   );
 
@@ -72,6 +73,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '750631009032',
     projectId: 'fin-tracker-pr',
     storageBucket: 'fin-tracker-pr.firebasestorage.app',
+    iosClientId: '750631009032-ad8t94kttu3n4sapndm102brc112v6e1.apps.googleusercontent.com',
     iosBundleId: 'com.example.frontend',
   );
 
@@ -83,4 +85,5 @@ class DefaultFirebaseOptions {
     authDomain: 'fin-tracker-pr.firebaseapp.com',
     storageBucket: 'fin-tracker-pr.firebasestorage.app',
   );
+
 }
