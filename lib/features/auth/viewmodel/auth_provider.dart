@@ -105,6 +105,50 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  // Update profile
+  Future<bool> updateProfile({String? name, String? email}) async {
+    _setLoading(true);
+    _clearError();
+
+    final result = await _authRepository.updateProfile(
+      name: name,
+      email: email,
+    );
+
+    _setLoading(false);
+
+    if (result['success']) {
+      _user = _authRepository.currentUser;
+      notifyListeners();
+      return true;
+    } else {
+      _errorMessage = result['message'];
+      notifyListeners();
+      return false;
+    }
+  }
+
+  // Change password
+  Future<bool> changePassword({required String newPassword}) async {
+    _setLoading(true);
+    _clearError();
+
+    final result = await _authRepository.changePassword(
+      newPassword: newPassword,
+    );
+
+    _setLoading(false);
+
+    if (result['success']) {
+      notifyListeners();
+      return true;
+    } else {
+      _errorMessage = result['message'];
+      notifyListeners();
+      return false;
+    }
+  }
+
   // Delete account
   Future<bool> deleteAccount() async {
     _setLoading(true);

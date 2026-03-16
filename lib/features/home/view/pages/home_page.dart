@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/app_pallete_dark.dart';
 import 'package:frontend/core/theme/app_pallete_light.dart';
+import 'package:frontend/features/account/screens/account_screen.dart';
 import 'package:frontend/features/auth/viewmodel/auth_provider.dart';
 import 'package:frontend/features/get_started/views/pages/get_started_page.dart';
 import 'package:provider/provider.dart';
@@ -78,7 +79,12 @@ class _HomePageState extends State<HomePage> {
               ),
               onTap: () {
                 Navigator.pop(context);
-                // Navigate to profile page
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AccountScreen(),
+                  ),
+                );
               },
             ),
             ListTile(

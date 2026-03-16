@@ -108,11 +108,80 @@ class AuthRepository {
     }
   }
 
-  // Delete account
+  // Soft delete account (set isDeleted=true)
   Future<Map<String, dynamic>> deleteAccount() async {
     try {
-      await _firebaseAuth.currentUser?.delete();
-      return {'success': true, 'message': 'Account deleted successfully'};
+      final user = _firebaseAuth.currentUser;
+      if (user == null) {
+        return {'success': false, 'message': 'No user is currently signed in.'};
+      }
+      await _firestore.collection('users').doc(user.uid).update({
+        'isDeleted': true,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      await signOut();
+      return {
+        'success': true,
+        'message': 'Account deleted (soft delete) successfully',
+      };
+    } on FirebaseException catch (e) {
+      return {'success': false, 'message': e.message ?? 'Firestore error'};
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'An unexpected error occurred. Please try again.',
+      };
+    }
+  }
+
+  // Update profile (name, email)
+  Future<Map<String, dynamic>> updateProfile({
+    String? name,
+    String? email,
+  }) async {
+    try {
+      final user = _firebaseAuth.currentUser;
+      if (user == null) {
+        return {'success': false, 'message': 'No user is currently signed in.'};
+      }
+      if (name != null && name.isNotEmpty) {
+        await user.updateDisplayName(name);
+        await _firestore.collection('users').doc(user.uid).update({
+          'name': name,
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+      }
+      if (email != null && email.isNotEmpty && email != user.email) {
+        await user.verifyBeforeUpdateEmail(email);
+      }
+      await user.reload();
+      return {
+        'success': true,
+        'message': email != null && email.isNotEmpty && email != user.email
+            ? 'Profile updated. Please verify your new email from your inbox.'
+            : 'Profile updated successfully',
+      };
+    } on FirebaseAuthException catch (e) {
+      return {'success': false, 'message': _getErrorMessage(e.code)};
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'An unexpected error occurred. Please try again.',
+      };
+    }
+  }
+
+  // Change password
+  Future<Map<String, dynamic>> changePassword({
+    required String newPassword,
+  }) async {
+    try {
+      final user = _firebaseAuth.currentUser;
+      if (user == null) {
+        return {'success': false, 'message': 'No user is currently signed in.'};
+      }
+      await user.updatePassword(newPassword);
+      return {'success': true, 'message': 'Password changed successfully'};
     } on FirebaseAuthException catch (e) {
       return {'success': false, 'message': _getErrorMessage(e.code)};
     } catch (e) {
